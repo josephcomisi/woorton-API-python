@@ -7,7 +7,10 @@ The main usage is get quotations and executing trades.
 Clients must be registered to Woorton OTC service to use this API. Contact Woorton team at contact@woorton.com
 
 # woorton-API-python
-Implementation of Woorton API in Python
+This repository contains an implementation of Woorton API in Python
 
+Link of API documentation: https://woortonotcv1.docs.apiary.io/
 
-API documentation: https://woortonotcv1.docs.apiary.io/#/reference/0/trades/list-trades/200?mc=reference%2F0%2Ftrades%2Flist-trades%2F200
+How to trade ?
+1. Requests a quote for given a instrument, side, and quantity
+2. Execute the trade on the returned RFQ data
