@@ -1,3 +1,5 @@
+![alt text](https://static.wixstatic.com/media/1bdd62_4f8f12adc705402a8ccbda80da49d6ae~mv2_d_2000_2000_s_2.png)
+
 # Woorton
 Woorton: Cryptocurrency Liquidity Provider for Professional Investors
 
