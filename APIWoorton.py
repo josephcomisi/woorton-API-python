@@ -15,7 +15,7 @@ class APIWoorton(object):
         :param token: token provided by Woorton team
         """
 
-        self.__api_url = 'https://woorton-staging.herokuapp.com/api/'
+        self.__api_url = 'https://woorton-sandbox.herokuapp.com/api/'
         self.__version = 'v1'
 
         self.__name_path_map = {}

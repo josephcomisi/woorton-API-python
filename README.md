@@ -10,7 +10,7 @@ The main usage is get quotations and executing trades.
 
 Clients must be registered to Woorton OTC service to use this API. Contact Woorton team at contact@woorton.com
 
-# woorton-API-python
+# API Python Implementation
 This repository contains an implementation of Woorton API in Python
 
 Link of API documentation: https://woortonotcv1.docs.apiary.io/
