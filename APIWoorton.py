@@ -83,6 +83,8 @@ class APIWoorton(object):
         except Exception as ex:
             print 'API Woorton Error: ' + str(ex)
 
+    # API Endpoints
+
     def request_for_quote(self, amount, instrument, direction):
         """
         Request For Quote at Woorton. Once the quotation is returned (in response),
@@ -176,7 +178,8 @@ class APIWoorton(object):
 
     def exposures(self):
         """
-        List your allowed and consumed exposure for all currencies at Woorton
+        List your allowed exposures for all currencies at Woorton
+        Remaining exposures = Exposures - Balances
         :return: json result from API
         """
         return self.__call('exposures', 'GET', {})
@@ -188,6 +191,8 @@ class APIWoorton(object):
         """
         return self.__call('instruments', 'GET', {})
 
+    # Functions
+
     def __update_instruments(self):
         instruments = self.instruments()
         for instrument in instruments['instrument']:
@@ -196,3 +201,14 @@ class APIWoorton(object):
     def market_order(self, amount, instrument, direction):
         self.request_for_quote(amount, instrument, direction)
         self.execute()
+        return self.state
+
+    def remaining_exposures(self):
+        exposures = self.exposures()
+        balances = self.balances()
+
+        remaining_exposures = {}
+        for currency, balance in exposures.items():
+            remaining_exposures[currency] = float(balance) - float(balances[currency])
+
+        return remaining_exposures
