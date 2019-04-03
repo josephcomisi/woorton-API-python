@@ -8,10 +8,10 @@ def main():
     """
 
     # Create object
-    woorton = APIWoorton(token='TOKEN_HERE')
+    woorton = APIWoorton(token='TOKEN_HERE', environment='sandbox')
 
     # Help on functions
-    woorton.help()
+    # woorton.help()
 
     """ Account details """
 
@@ -36,17 +36,20 @@ def main():
     """ Trading """
 
     # 1) Request For Quote
-    # print woorton.request_for_quote(amount=1.0, instrument='BTCEUR.SPOT', direction='buy')
+    # rfq = woorton.request_for_quote(amount=1.0, instrument='BTCEUR.SPOT', direction='buy')
+    # print rfq
 
     # 2) Execute RFQ
-    # print woorton.execute()
+    # execution = woorton.execute(rfq)
+    # print execution
 
     # 3) State of execution
-    # print woorton.state
+    # state = woorton.state(execution)
+    # print state
     
     # Or alternatively:
     # print woorton.market_order(amount=1.0, instrument='BTCEUR.SPOT', direction='buy')
-    
+
 
 if __name__ == '__main__':
         main()

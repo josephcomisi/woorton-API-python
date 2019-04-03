@@ -9,13 +9,22 @@ class APIWoorton(object):
     Clients must be registered to Woorton OTC service to use this API.
     """
 
-    def __init__(self, token):
+    __env = {
+        'sandbox': 'https://api-sandbox.woorton.com/api/',
+        'prod': 'https://api.woorton.com/api/',
+        'production': 'https://api.woorton.com/api/',
+    }
+
+    def __init__(self, token, environment='sandbox'):
         """
         Create an object to make API requests with authentification information
         :param token: token provided by Woorton team
         """
+        if environment not in self.__env:
+            raise Exception('wrong environment')
 
-        self.__api_url = 'https://woorton-sandbox.herokuapp.com/api/'
+        self.__api_url = self.__env[environment]
+
         self.__version = 'v1'
 
         self.__name_path_map = {}
@@ -52,7 +61,7 @@ class APIWoorton(object):
         for key, value in self.__name_path_map.items():
             print('Action: {}, URL: {}'.format(key, value))
 
-    def __call(self, action_name, method, params):
+    def call(self, action_name, method, params):
         if method not in self.__methods:
             raise Exception('wrong method')
 
@@ -66,6 +75,7 @@ class APIWoorton(object):
         body = json.dumps(params)
 
         try:
+            # print '{} {} {}'.format(url, body, self.__headers)
             # Request
             if method == 'GET':
                 request = requests.get(url, body, headers=self.__headers)
@@ -76,7 +86,9 @@ class APIWoorton(object):
             self.response = request.json()
 
             if 'errors' in self.response:
-                raise Exception(self.response['errors'][0]['message'])
+                raise Exception(
+                    str(self.response['errors'][0]['message']) + ': ' + str(params)
+                )
 
             return self.response
 
@@ -114,26 +126,30 @@ class APIWoorton(object):
 
         self.rfq = params
         self.state = 'pending'
-        self.response = self.__call('rfq', 'POST', params)
+        self.response = self.call('rfq', 'POST', params)
 
         return self.response
 
-    def execute(self):
+    def execute(self, rfq=None):
         """
         Confirm the last Request For Quote at Woorton
         Quotation can only be confirmed, not changed.
+
+        :param rfq: a JSON RFQ (if empty, will execute last RFQ)
         :return: json result from API
         """
+        if rfq is None:
+            rfq = self.response
+
         params = {
-            'request_id': self.response['request_id'],
-            'amount': self.response['amount'],
-            'instrument': self.response['instrument'],
-            'direction': self.response['direction'],
-            'total': self.response['total'],
+            'request_id': rfq['request_id'],
+            'amount': rfq['amount'],
+            'instrument': rfq['instrument'],
+            'direction': rfq['direction'],
+            'total': rfq['total'],
         }
 
-        self.execution = self.__call('trades', 'POST', params)
-        self.state = self.execution['state']
+        self.execution = self.call('trades', 'POST', params)
 
         return self.execution
 
@@ -150,7 +166,7 @@ class APIWoorton(object):
             else:
                 params = {'operation': operation}
 
-        return self.__call('ledger', 'GET', params)
+        return self.call('ledger', 'GET', params)
 
     def trades(self, page=0):
         """
@@ -165,7 +181,7 @@ class APIWoorton(object):
         if page != 0:
             params = {'page': page}
 
-        return self.__call('trades', 'GET', params)
+        return self.call('trades', 'GET', params)
 
     def balances(self):
         """
@@ -174,7 +190,7 @@ class APIWoorton(object):
         Positive amount: Woorton owe you the amount
         :return: json result from API
         """
-        return self.__call('balances', 'GET', {})
+        return self.call('balances', 'GET', {})
 
     def exposures(self):
         """
@@ -182,14 +198,14 @@ class APIWoorton(object):
         Remaining exposures = Exposures - Balances
         :return: json result from API
         """
-        return self.__call('exposures', 'GET', {})
+        return self.call('exposures', 'GET', {})
 
     def instruments(self):
         """
         List all instruments available on the API Woorton
         :return: json result from API
         """
-        return self.__call('instruments', 'GET', {})
+        return self.call('instruments', 'GET', {})
 
     # Functions
 
@@ -199,9 +215,21 @@ class APIWoorton(object):
             self.instrument_list.append(instrument)
 
     def market_order(self, amount, instrument, direction):
-        self.request_for_quote(amount, instrument, direction)
-        self.execute()
+        rfq = self.request_for_quote(amount, instrument, direction)
+        self.execute(rfq)
         return self.state
+
+    def state(self, execution=None):
+        """
+        Return the state of the execution for an RFQ
+
+        :param execution: last execution if empty
+        :return: state, string
+        """
+        if execution is None:
+            execution = self.execution
+
+        return execution['state']
 
     def remaining_exposures(self):
         exposures = self.exposures()
